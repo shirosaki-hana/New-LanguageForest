@@ -61,6 +61,13 @@ export default {
       translating: 'Translating...',
       translateButton: 'Translate',
       stopButton: 'Stop',
+      // Counters
+      characters: 'chars',
+      words: 'words',
+      lines: 'lines',
+      tokens: 'tokens',
+      promptTokens: 'prompt',
+      completionTokens: 'completion',
       // Snackbar messages
       copySuccess: 'Copied to clipboard.',
       copyError: 'Failed to copy.',

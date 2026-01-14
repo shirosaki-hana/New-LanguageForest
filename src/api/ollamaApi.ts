@@ -34,7 +34,7 @@ export async function fetchModels(): Promise<OllamaTagsResponse> {
 export async function streamChat(
   request: OllamaChatRequest,
   onChunk: (chunk: OllamaChatStreamChunk) => void,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<void> {
   const response = await fetch(`${API_BASE}/chat`, {
     method: 'POST',

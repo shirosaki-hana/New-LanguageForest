@@ -14,18 +14,12 @@ import { DEFAULT_PAIR_ID } from '../config/languagePairs';
 /**
  * 번역 내용 기반 제목 생성 (백그라운드)
  */
-async function generateTitleInBackground(
-  historyId: string,
-  sourceText: string,
-  translatedText: string,
-  modelName: string,
-) {
+async function generateTitleInBackground(historyId: string, sourceText: string, modelName: string) {
   try {
-    const prompt = `Generate a very short title that summarizes this translation. Output ONLY the title, nothing else.
-
-Original: ${sourceText.slice(0, 200)}
-Translation: ${translatedText.slice(0, 200)}
-
+    const prompt = `Create a short title for the text below. Output ONLY the title, nothing else.
+***
+${sourceText.slice(0, 1000)}
+***
 Title:`;
 
     const response = await generate({
@@ -38,7 +32,7 @@ Title:`;
       .trim()
       .replace(/^["']|["']$/g, '') // 따옴표 제거
       .split('\n')[0] // 첫 줄만
-      .slice(0, 100); 
+      .slice(0, 100);
 
     if (title) {
       useHistoryStore.getState().updateHistoryTitle(historyId, title);
@@ -61,6 +55,12 @@ interface TranslateState {
   sourceText: string;
   translatedText: string;
   isTranslating: boolean;
+
+  // 토큰 카운트 정보
+  tokenCounts: {
+    promptTokens: number;
+    completionTokens: number;
+  } | null;
 
   // 스트리밍 중단을 위한 AbortController
   abortController: AbortController | null;
@@ -87,6 +87,8 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   sourceText: '',
   translatedText: '',
   isTranslating: false,
+
+  tokenCounts: null,
 
   abortController: null,
 
@@ -159,6 +161,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     set({
       isTranslating: true,
       translatedText: '',
+      tokenCounts: null,
       abortController,
     });
 
@@ -178,12 +181,31 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
               translatedText: state.translatedText + chunk.message.content,
             }));
           }
+
+          // 스트리밍 완료 시 토큰 카운트 정보 저장
+          if (chunk.done && (chunk.prompt_eval_count || chunk.eval_count)) {
+            set({
+              tokenCounts: {
+                promptTokens: chunk.prompt_eval_count || 0,
+                completionTokens: chunk.eval_count || 0,
+              },
+            });
+          }
         },
-        abortController.signal,
+        abortController.signal
       );
 
-      // 번역 완료 시 히스토리에 저장
-      const finalTranslatedText = get().translatedText;
+      // 번역 완료 시 후처리: <!-- End of translation --> 주석 제거
+      let finalTranslatedText = get().translatedText;
+      const cleanedText = finalTranslatedText.replace(/<!--\s*End of translation\s*-->/gi, '').trim();
+
+      // 정제된 텍스트로 업데이트
+      if (cleanedText !== finalTranslatedText) {
+        set({ translatedText: cleanedText });
+        finalTranslatedText = cleanedText;
+      }
+
+      // 히스토리에 저장
       if (finalTranslatedText.trim()) {
         const historyId = useHistoryStore.getState().addHistory({
           sourceText,
@@ -192,7 +214,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
         });
 
         // 백그라운드에서 제목 생성 (UI 블로킹 없음)
-        generateTitleInBackground(historyId, sourceText, finalTranslatedText, selectedModel);
+        generateTitleInBackground(historyId, sourceText, selectedModel);
       }
     } catch (error) {
       // 사용자가 중단한 경우
@@ -228,6 +250,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
       sourceText: '',
       translatedText: '',
       isTranslating: false,
+      tokenCounts: null,
       abortController: null,
     });
   },

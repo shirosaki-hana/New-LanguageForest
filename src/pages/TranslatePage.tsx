@@ -34,11 +34,7 @@ export default function TranslatePage() {
       <TranslatePanel />
 
       {/* 히스토리 Drawer */}
-      <HistoryDrawer
-        open={historyOpen}
-        onClose={() => setHistoryOpen(false)}
-        onSelectHistory={handleSelectHistory}
-      />
+      <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} onSelectHistory={handleSelectHistory} />
     </Box>
   );
 }

@@ -3,25 +3,10 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import {
-  Drawer,
-  Box,
-  Typography,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Divider,
-  Tooltip,
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  Delete as DeleteIcon,
-  DeleteSweep as ClearAllIcon,
-  AutoAwesome as AutoAwesomeIcon,
-} from '@mui/icons-material';
+import { Drawer, Box, Typography, IconButton, List, ListItemButton, ListItemText, Stack, Divider, Tooltip } from '@mui/material';
+import { Close as CloseIcon, Delete as DeleteIcon, DeleteSweep as ClearAllIcon, AutoAwesome as AutoAwesomeIcon } from '@mui/icons-material';
 import { useHistoryStore, type TranslationHistoryItem } from '../stores/historyStore';
+import { useDialogStore } from '../stores/dialogStore';
 
 interface HistoryDrawerProps {
   open: boolean;
@@ -32,6 +17,7 @@ interface HistoryDrawerProps {
 export default function HistoryDrawer({ open, onClose, onSelectHistory }: HistoryDrawerProps) {
   const { t } = useTranslation();
   const { history, removeHistory, clearHistory } = useHistoryStore();
+  const { showConfirm } = useDialogStore();
 
   // 날짜 포맷
   const formatDate = (timestamp: number) => {
@@ -67,8 +53,9 @@ export default function HistoryDrawer({ open, onClose, onSelectHistory }: Histor
     removeHistory(id);
   };
 
-  const handleClearAll = () => {
-    if (window.confirm(t('history.clearConfirm'))) {
+  const handleClearAll = async () => {
+    const confirmed = await showConfirm(t('history.clearConfirm'));
+    if (confirmed) {
       clearHistory();
     }
   };
@@ -138,11 +125,7 @@ export default function HistoryDrawer({ open, onClose, onSelectHistory }: Histor
                     <ListItemText
                       primary={
                         <Stack direction='row' alignItems='center' spacing={0.5}>
-                          {item.title && (
-                            <AutoAwesomeIcon
-                              sx={{ fontSize: 14, color: 'primary.main', flexShrink: 0 }}
-                            />
-                          )}
+                          {item.title && <AutoAwesomeIcon sx={{ fontSize: 14, color: 'primary.main', flexShrink: 0 }} />}
                           <Typography
                             variant='body2'
                             sx={{

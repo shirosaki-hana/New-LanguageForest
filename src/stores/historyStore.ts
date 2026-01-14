@@ -71,6 +71,6 @@ export const useHistoryStore = create<HistoryState>()(
     }),
     {
       name: 'ollama-translate-history', // 로컬 스토리지 키
-    },
-  ),
+    }
+  )
 );

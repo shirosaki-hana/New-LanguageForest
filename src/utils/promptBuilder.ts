@@ -5,8 +5,6 @@
 import type { OllamaChatMessage } from '../types/ollama';
 import { getLanguagePair, DEFAULT_PAIR_ID } from '../config/languagePairs';
 
-
-
 /**
  * 번역 요청을 위한 메시지 배열 생성
  * @param sourceText 원문

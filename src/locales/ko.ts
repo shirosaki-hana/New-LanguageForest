@@ -2,7 +2,7 @@ export default {
   translation: {
     // Common
     common: {
-      appName: 'Ollama 번역기',
+      appName: 'Ollama Translator',
       loading: '로딩 중...',
       error: '오류',
       success: '성공',
@@ -61,6 +61,13 @@ export default {
       translating: '번역 중...',
       translateButton: '번역하기',
       stopButton: '번역 중단',
+      // 카운터
+      characters: '문자',
+      words: '단어',
+      lines: '줄',
+      tokens: '토큰',
+      promptTokens: '프롬프트',
+      completionTokens: '생성',
       // 스낵바 메시지
       copySuccess: '복사되었습니다.',
       copyError: '복사에 실패했습니다.',

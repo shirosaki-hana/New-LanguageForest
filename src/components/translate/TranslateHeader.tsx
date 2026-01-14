@@ -1,20 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import {
-  Box,
-  Stack,
-  Typography,
-  IconButton,
-  Tooltip,
-  FormControl,
-  Select,
-  MenuItem,
-  CircularProgress,
-} from '@mui/material';
-import {
-  Translate as TranslateIcon,
-  Settings as SettingsIcon,
-  History as HistoryIcon,
-} from '@mui/icons-material';
+import { Box, Stack, Typography, IconButton, Tooltip, FormControl, Select, MenuItem, CircularProgress } from '@mui/material';
+import { Translate as TranslateIcon, Settings as SettingsIcon, History as HistoryIcon } from '@mui/icons-material';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useTranslateStore } from '../../stores/translateStore';
 import { LANGUAGE_PAIRS } from '../../config/languagePairs';
@@ -26,15 +12,8 @@ interface TranslateHeaderProps {
 export default function TranslateHeader({ onHistoryClick }: TranslateHeaderProps) {
   const { t } = useTranslation();
   const { openSettings } = useSettingsStore();
-  const {
-    models,
-    selectedModel,
-    isLoadingModels,
-    isTranslating,
-    setSelectedModel,
-    selectedPairId,
-    setSelectedPairId,
-  } = useTranslateStore();
+  const { models, selectedModel, isLoadingModels, isTranslating, setSelectedModel, selectedPairId, setSelectedPairId } =
+    useTranslateStore();
 
   return (
     <Stack
