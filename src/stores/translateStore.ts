@@ -9,6 +9,7 @@ import { fetchModels, streamChat, generate } from '../api/ollamaApi';
 import { buildTranslationMessages } from '../utils/promptBuilder';
 import { snackbar } from './snackbarStore';
 import { useHistoryStore } from './historyStore';
+import { DEFAULT_PAIR_ID } from '../config/languagePairs';
 
 /**
  * 번역 내용 기반 제목 생성 (백그라운드)
@@ -53,6 +54,9 @@ interface TranslateState {
   selectedModel: string;
   isLoadingModels: boolean;
 
+  // 언어쌍 관련
+  selectedPairId: string;
+
   // 번역 관련
   sourceText: string;
   translatedText: string;
@@ -64,6 +68,7 @@ interface TranslateState {
   // 액션
   loadModels: () => Promise<void>;
   setSelectedModel: (model: string) => void;
+  setSelectedPairId: (pairId: string) => void;
   setSourceText: (text: string) => void;
   setTranslatedText: (text: string) => void;
   translate: () => Promise<void>;
@@ -76,6 +81,8 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
   models: [],
   selectedModel: '',
   isLoadingModels: false,
+
+  selectedPairId: DEFAULT_PAIR_ID,
 
   sourceText: '',
   translatedText: '',
@@ -112,6 +119,11 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     set({ selectedModel: model });
   },
 
+  // 언어쌍 선택
+  setSelectedPairId: (pairId: string) => {
+    set({ selectedPairId: pairId });
+  },
+
   // 원문 입력
   setSourceText: (text: string) => {
     set({ sourceText: text });
@@ -124,7 +136,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
 
   // 번역 실행
   translate: async () => {
-    const { sourceText, selectedModel, isTranslating } = get();
+    const { sourceText, selectedModel, selectedPairId, isTranslating } = get();
 
     // 유효성 검사
     if (!sourceText.trim()) {
@@ -151,7 +163,7 @@ export const useTranslateStore = create<TranslateState>((set, get) => ({
     });
 
     try {
-      const messages = buildTranslationMessages(sourceText);
+      const messages = buildTranslationMessages(sourceText, selectedPairId);
 
       await streamChat(
         {

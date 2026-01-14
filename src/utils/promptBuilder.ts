@@ -3,29 +3,24 @@
  */
 
 import type { OllamaChatMessage } from '../types/ollama';
-
-/**
- * 한국어 -> 영어 번역을 위한 시스템 프롬프트
- */
-const KOREAN_TO_ENGLISH_SYSTEM_PROMPT = `You are a professional translator. Your task is to translate Korean text to English.
-
-Rules:
-- Translate the given Korean text to natural, fluent English.
-- Maintain the original tone and style (formal/informal).
-- Preserve any proper nouns, brand names, or technical terms appropriately.
-- Do NOT add explanations, comments, or notes.
-- Output ONLY the translated English text, nothing else.`;
+import { getLanguagePair, DEFAULT_PAIR_ID } from '../config/languagePairs';
 
 /**
  * 번역 요청을 위한 메시지 배열 생성
- * @param sourceText 원문 (한국어)
+ * @param sourceText 원문
+ * @param pairId 언어쌍 ID (예: 'ko-en', 'en-ko')
  * @returns Ollama 채팅 메시지 배열
  */
-export function buildTranslationMessages(sourceText: string): OllamaChatMessage[] {
+export function buildTranslationMessages(
+  sourceText: string,
+  pairId: string = DEFAULT_PAIR_ID,
+): OllamaChatMessage[] {
+  const pair = getLanguagePair(pairId);
+
   return [
     {
       role: 'system',
-      content: KOREAN_TO_ENGLISH_SYSTEM_PROMPT,
+      content: pair.systemPrompt,
     },
     {
       role: 'user',
