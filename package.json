@@ -13,6 +13,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
+    "start": "node server.mjs",
     "build": "pnpm clean && tsc -b && vite build",
     "build:debug": "pnpm clean && tsc -b && vite build --mode debug",
     "lint": "eslint .",
