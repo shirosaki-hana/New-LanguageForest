@@ -78,7 +78,7 @@ const start = async () => {
   }
 };
 
-start().catch((err) => {
+start().catch(err => {
   fastify.log.error(err);
   process.exitCode = 1;
 });

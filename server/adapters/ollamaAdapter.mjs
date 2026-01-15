@@ -15,13 +15,13 @@ export class OllamaAdapter {
    */
   async listModels() {
     return new Promise((resolve, reject) => {
-      const req = http.request(`${this.baseUrl}/api/tags`, { method: 'GET' }, (res) => {
+      const req = http.request(`${this.baseUrl}/api/tags`, { method: 'GET' }, res => {
         let data = '';
-        res.on('data', (chunk) => (data += chunk));
+        res.on('data', chunk => (data += chunk));
         res.on('end', () => {
           try {
             resolve(JSON.parse(data));
-          } catch (e) {
+          } catch {
             reject(new Error('Failed to parse Ollama response'));
           }
         });
@@ -48,7 +48,7 @@ export class OllamaAdapter {
         },
       };
 
-      const proxyReq = http.request(options, (proxyRes) => {
+      const proxyReq = http.request(options, proxyRes => {
         reply.raw.writeHead(proxyRes.statusCode, {
           'Content-Type': 'application/x-ndjson',
           'Transfer-Encoding': 'chunked',
@@ -56,7 +56,7 @@ export class OllamaAdapter {
           Connection: 'keep-alive',
         });
 
-        proxyRes.on('data', (chunk) => {
+        proxyRes.on('data', chunk => {
           reply.raw.write(chunk);
         });
 
@@ -68,7 +68,7 @@ export class OllamaAdapter {
         proxyRes.on('error', reject);
       });
 
-      proxyReq.on('error', (err) => {
+      proxyReq.on('error', err => {
         reject(err);
       });
 
@@ -94,7 +94,7 @@ export class OllamaAdapter {
         },
       };
 
-      const proxyReq = http.request(options, (proxyRes) => {
+      const proxyReq = http.request(options, proxyRes => {
         reply.raw.writeHead(proxyRes.statusCode, {
           'Content-Type': 'application/x-ndjson',
           'Transfer-Encoding': 'chunked',
@@ -102,7 +102,7 @@ export class OllamaAdapter {
           Connection: 'keep-alive',
         });
 
-        proxyRes.on('data', (chunk) => {
+        proxyRes.on('data', chunk => {
           reply.raw.write(chunk);
         });
 
@@ -114,7 +114,7 @@ export class OllamaAdapter {
         proxyRes.on('error', reject);
       });
 
-      proxyReq.on('error', (err) => {
+      proxyReq.on('error', err => {
         reject(err);
       });
 

@@ -26,7 +26,7 @@ export class GeminiAdapter {
 
     // Ollama /api/tags 형식으로 변환
     return {
-      models: geminiModels.map((m) => ({
+      models: geminiModels.map(m => ({
         name: m.name,
         model: m.name,
         modified_at: new Date().toISOString(),

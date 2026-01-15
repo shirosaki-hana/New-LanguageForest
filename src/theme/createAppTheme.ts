@@ -103,7 +103,7 @@ export function createAppTheme(mode: 'light' | 'dark') {
           body: {
             backgroundImage:
               mode === 'light'
-                ? `radial-gradient(40rem 40rem at -10% -20%, ${alpha(primary.main, 0.10)}, transparent), radial-gradient(50rem 40rem at 120% -10%, ${alpha(secondary.main, 0.10)}, transparent)`
+                ? `radial-gradient(40rem 40rem at -10% -20%, ${alpha(primary.main, 0.1)}, transparent), radial-gradient(50rem 40rem at 120% -10%, ${alpha(secondary.main, 0.1)}, transparent)`
                 : `radial-gradient(40rem 40rem at -10% -20%, ${alpha(primary.main, 0.18)}, transparent), radial-gradient(50rem 40rem at 120% -10%, ${alpha(secondary.main, 0.14)}, transparent)`,
             backgroundAttachment: 'fixed',
           },

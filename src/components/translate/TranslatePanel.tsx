@@ -189,126 +189,139 @@ export default function TranslatePanel() {
           minHeight: 0,
         })}
       >
-        {/* 컨트롤 바 - 언어쌍, 모델 선택, 번역 버튼 */}
+        {/* 컨트롤 바 - 좌(언어/사전) · 중(모델) · 우(주요 액션) */}
         <Box
           sx={{
             px: 2,
-            py: 1.5,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 2,
+            py: 1.25,
             borderBottom: theme => `1px solid ${theme.palette.divider}`,
             flexShrink: 0,
-            flexWrap: 'wrap',
           }}
         >
-          {/* 언어쌍 선택 */}
-          <FormControl size='small'>
-            <Select
-              value={selectedPairId}
-              onChange={e => setSelectedPairId(e.target.value)}
-              disabled={isTranslating}
-              sx={{
-                minWidth: 180,
-                '& .MuiSelect-select': {
-                  py: 0.75,
-                  px: 2,
-                  fontSize: '0.9rem',
-                  fontWeight: 500,
-                  textAlign: 'center',
-                },
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'divider',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'primary.main',
-                },
-              }}
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25} alignItems={{ xs: 'stretch', md: 'center' }} sx={{ minWidth: 0 }}>
+            {/* 좌/중 그룹 */}
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1.25}
+              alignItems={{ xs: 'stretch', sm: 'center' }}
+              sx={{ flex: 1, minWidth: 0 }}
             >
-              {getLanguagePairs().map(pair => (
-                <MenuItem key={pair.id} value={pair.id}>
-                  {pair.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              {/* 언어쌍 + 사전 */}
+              <Stack direction='row' spacing={1} alignItems='center' sx={{ minWidth: 0, flexWrap: 'wrap' }}>
+                <FormControl size='small' sx={{ minWidth: 200 }}>
+                  <Select
+                    value={selectedPairId}
+                    onChange={e => setSelectedPairId(e.target.value)}
+                    disabled={isTranslating}
+                    sx={{
+                      '& .MuiSelect-select': {
+                        py: 0.75,
+                        px: 2,
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                        textAlign: 'center',
+                      },
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'divider',
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'primary.main',
+                      },
+                    }}
+                  >
+                    {getLanguagePairs().map(pair => (
+                      <MenuItem key={pair.id} value={pair.id}>
+                        {pair.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-          {/* 딕셔너리 버튼 */}
-          <Tooltip title={t('dictionary.title')}>
-            <IconButton
-              size='small'
-              onClick={() => openDictionaryDialog(selectedPairId)}
-              disabled={isTranslating}
-              sx={{
-                border: 1,
-                borderColor: 'divider',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  bgcolor: 'action.hover',
-                },
-              }}
-            >
-              <DictionaryIcon fontSize='small' />
-            </IconButton>
-          </Tooltip>
+                <Tooltip title={t('dictionary.title')}>
+                  <IconButton
+                    size='small'
+                    onClick={() => openDictionaryDialog(selectedPairId)}
+                    disabled={isTranslating}
+                    sx={{
+                      border: 1,
+                      borderColor: 'divider',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
+                    <DictionaryIcon fontSize='small' />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
 
-          {/* 모델 선택 */}
-          <FormControl size='small' sx={{ minWidth: 160 }}>
-            <Select
-              value={selectedModel}
-              onChange={e => setSelectedModel(e.target.value)}
-              disabled={isLoadingModels || isTranslating}
-              displayEmpty
-              sx={{
-                '& .MuiSelect-select': {
-                  py: 0.75,
-                  fontSize: '0.875rem',
-                },
-              }}
-            >
-              {isLoadingModels ? (
-                <MenuItem disabled>
-                  <CircularProgress size={14} sx={{ mr: 1 }} />
-                  {t('translate.modelLoading')}
-                </MenuItem>
-              ) : models.length === 0 ? (
-                <MenuItem disabled>{t('translate.noModels')}</MenuItem>
+              {/* 모델 선택 */}
+              <FormControl size='small' sx={{ minWidth: 220 }}>
+                <Select
+                  value={selectedModel}
+                  onChange={e => setSelectedModel(e.target.value)}
+                  disabled={isLoadingModels || isTranslating}
+                  displayEmpty
+                  sx={{
+                    '& .MuiSelect-select': {
+                      py: 0.75,
+                      fontSize: '0.875rem',
+                    },
+                  }}
+                >
+                  {isLoadingModels ? (
+                    <MenuItem disabled>
+                      <CircularProgress size={14} sx={{ mr: 1 }} />
+                      {t('translate.modelLoading')}
+                    </MenuItem>
+                  ) : models.length === 0 ? (
+                    <MenuItem disabled>{t('translate.noModels')}</MenuItem>
+                  ) : (
+                    models.map(model => (
+                      <MenuItem key={model.name} value={model.name}>
+                        {model.name}
+                      </MenuItem>
+                    ))
+                  )}
+                </Select>
+              </FormControl>
+            </Stack>
+
+            {/* 우 그룹: 주요 액션 */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              {isTranslating ? (
+                <Button
+                  variant='outlined'
+                  color='error'
+                  onClick={stopTranslation}
+                  startIcon={<StopIcon />}
+                  sx={{ minWidth: { xs: '100%', md: 120 } }}
+                >
+                  {t('translate.stopButton')}
+                </Button>
               ) : (
-                models.map(model => (
-                  <MenuItem key={model.name} value={model.name}>
-                    {model.name}
-                  </MenuItem>
-                ))
+                <Button
+                  variant='contained'
+                  onClick={translate}
+                  disabled={!sourceText.trim() || !selectedModel || isLoadingModels}
+                  startIcon={<TranslateIcon />}
+                  sx={theme => ({
+                    minWidth: { xs: '100%', md: 120 },
+                    background: theme.custom.gradient.primary,
+                    '&:hover': {
+                      background: theme.custom.gradient.primaryHover,
+                    },
+                    '&:disabled': {
+                      background: 'none',
+                    },
+                  })}
+                >
+                  {t('translate.translateButton')}
+                </Button>
               )}
-            </Select>
-          </FormControl>
-
-          {/* 번역 버튼 */}
-          {isTranslating ? (
-            <Button variant='outlined' color='error' onClick={stopTranslation} startIcon={<StopIcon />} sx={{ minWidth: 120 }}>
-              {t('translate.stopButton')}
-            </Button>
-          ) : (
-            <Button
-              variant='contained'
-              onClick={translate}
-              disabled={!sourceText.trim() || !selectedModel || isLoadingModels}
-              startIcon={<TranslateIcon />}
-              sx={theme => ({
-                minWidth: 120,
-                background: theme.custom.gradient.primary,
-                '&:hover': {
-                  background: theme.custom.gradient.primaryHover,
-                },
-                '&:disabled': {
-                  background: 'none',
-                },
-              })}
-            >
-              {t('translate.translateButton')}
-            </Button>
-          )}
+            </Box>
+          </Stack>
         </Box>
 
         {/* 입력/출력 영역 */}
