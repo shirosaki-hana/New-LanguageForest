@@ -21,7 +21,7 @@ export default function TranslateHeader({ onHistoryClick }: TranslateHeaderProps
         py: 1,
         borderBottom: '1px solid',
         borderColor: 'divider',
-        bgcolor: theme.palette.mode === 'light' ? 'rgba(255,255,255,0.8)' : 'rgba(2,6,23,0.7)',
+        bgcolor: theme.custom.glassmorphism.medium,
         backdropFilter: 'blur(8px)',
         flexShrink: 0,
       })}
@@ -40,13 +40,13 @@ export default function TranslateHeader({ onHistoryClick }: TranslateHeaderProps
       />
       <Typography
         variant='subtitle1'
-        sx={{
+        sx={theme => ({
           fontWeight: 700,
-          background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
+          background: theme.custom.gradient.primary,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           flexShrink: 0,
-        }}
+        })}
       >
         {t('common.appName')}
       </Typography>

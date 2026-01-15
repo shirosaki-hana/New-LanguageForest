@@ -1,4 +1,4 @@
-import { useRef, useCallback, useMemo } from 'react';
+import { useRef, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -35,6 +35,8 @@ export default function TranslatePanel() {
   const sourceRef = useRef<HTMLTextAreaElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
   const scrollSourceRef = useRef<'source' | 'target' | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const lastScrollTimeRef = useRef<number>(0);
   const {
     sourceText,
     translatedText,
@@ -76,7 +78,7 @@ export default function TranslatePanel() {
     return { characters };
   }, [translatedText]);
 
-  // 스크롤 동기화 핸들러 (비율 기반, 양방향)
+  // 스크롤 동기화 핸들러 (비율 기반, 양방향, 최적화 적용)
   const syncScroll = useCallback(
     (source: 'source' | 'target') => {
       // 스트리밍 중에는 동기화 비활성화
@@ -85,34 +87,57 @@ export default function TranslatePanel() {
       // 무한 루프 방지: 다른 쪽에서 트리거된 스크롤이면 무시
       if (scrollSourceRef.current && scrollSourceRef.current !== source) return;
 
+      // Throttle: 8ms 간격으로 제한 (약 120fps, 부드러움과 성능 균형)
+      const now = performance.now();
+      if (now - lastScrollTimeRef.current < 8) return;
+      lastScrollTimeRef.current = now;
+
       const sourceEl = sourceRef.current;
       const targetEl = targetRef.current;
 
       if (!sourceEl || !targetEl) return;
 
-      scrollSourceRef.current = source;
-
-      if (source === 'source') {
-        // 원문 → 번역문 동기화
-        const maxScroll = sourceEl.scrollHeight - sourceEl.clientHeight;
-        const scrollRatio = maxScroll > 0 ? sourceEl.scrollTop / maxScroll : 0;
-        const targetMaxScroll = targetEl.scrollHeight - targetEl.clientHeight;
-        targetEl.scrollTop = scrollRatio * targetMaxScroll;
-      } else {
-        // 번역문 → 원문 동기화
-        const maxScroll = targetEl.scrollHeight - targetEl.clientHeight;
-        const scrollRatio = maxScroll > 0 ? targetEl.scrollTop / maxScroll : 0;
-        const sourceMaxScroll = sourceEl.scrollHeight - sourceEl.clientHeight;
-        sourceEl.scrollTop = scrollRatio * sourceMaxScroll;
+      // 이전 rAF 취소 (중복 실행 방지)
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
       }
 
-      // 다음 프레임에서 플래그 해제 (무한 루프 방지)
-      requestAnimationFrame(() => {
-        scrollSourceRef.current = null;
+      scrollSourceRef.current = source;
+
+      // requestAnimationFrame으로 스크롤 동기화 (브라우저 렌더링 사이클에 맞춤)
+      rafIdRef.current = requestAnimationFrame(() => {
+        if (source === 'source') {
+          // 원문 → 번역문 동기화
+          const maxScroll = sourceEl.scrollHeight - sourceEl.clientHeight;
+          const scrollRatio = maxScroll > 0 ? sourceEl.scrollTop / maxScroll : 0;
+          const targetMaxScroll = targetEl.scrollHeight - targetEl.clientHeight;
+          targetEl.scrollTop = scrollRatio * targetMaxScroll;
+        } else {
+          // 번역문 → 원문 동기화
+          const maxScroll = targetEl.scrollHeight - targetEl.clientHeight;
+          const scrollRatio = maxScroll > 0 ? targetEl.scrollTop / maxScroll : 0;
+          const sourceMaxScroll = sourceEl.scrollHeight - sourceEl.clientHeight;
+          sourceEl.scrollTop = scrollRatio * sourceMaxScroll;
+        }
+
+        // 다음 프레임에서 플래그 해제 (무한 루프 방지)
+        rafIdRef.current = requestAnimationFrame(() => {
+          scrollSourceRef.current = null;
+          rafIdRef.current = null;
+        });
       });
     },
     [isTranslating]
   );
+
+  // 컴포넌트 언마운트 시 rAF 정리
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   const handleSourceScroll = useCallback(() => syncScroll('source'), [syncScroll]);
   const handleTargetScroll = useCallback(() => syncScroll('target'), [syncScroll]);
@@ -159,7 +184,7 @@ export default function TranslatePanel() {
           display: 'flex',
           flexDirection: 'column',
           borderRadius: 0,
-          bgcolor: theme.palette.mode === 'light' ? 'rgba(255,255,255,0.7)' : 'rgba(2,6,23,0.55)',
+          bgcolor: theme.custom.glassmorphism.light,
           overflow: 'hidden',
           minHeight: 0,
         })}
@@ -270,16 +295,16 @@ export default function TranslatePanel() {
               onClick={translate}
               disabled={!sourceText.trim() || !selectedModel || isLoadingModels}
               startIcon={<TranslateIcon />}
-              sx={{
+              sx={theme => ({
                 minWidth: 120,
-                background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+                background: theme.custom.gradient.primary,
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #1d4ed8, #6d28d9)',
+                  background: theme.custom.gradient.primaryHover,
                 },
                 '&:disabled': {
                   background: 'none',
                 },
-              }}
+              })}
             >
               {t('translate.translateButton')}
             </Button>
@@ -327,6 +352,9 @@ export default function TranslatePanel() {
                     height: '100% !important',
                     overflow: 'auto !important',
                     p: 2,
+                    // 스크롤 성능 최적화 (Firefox 개선)
+                    willChange: 'scroll-position',
+                    contain: 'strict',
                   },
                 }}
               />
@@ -394,7 +422,7 @@ export default function TranslatePanel() {
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
-              bgcolor: theme.palette.mode === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)',
+              bgcolor: theme.custom.subtle.background,
               minHeight: 0,
             })}
           >
@@ -408,6 +436,9 @@ export default function TranslatePanel() {
                 overflow: 'auto',
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
+                // 스크롤 성능 최적화 (Firefox 개선)
+                willChange: 'scroll-position',
+                contain: 'content',
               }}
             >
               {isTranslating && !translatedText && (
