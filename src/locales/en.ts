@@ -2,7 +2,7 @@ export default {
   translation: {
     // Common
     common: {
-      appName: 'Ollama Translator',
+      appName: 'LanguageForest',
       loading: 'Loading...',
       error: 'Error',
       success: 'Success',
