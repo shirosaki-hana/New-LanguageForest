@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Box, Stack, Typography, IconButton, Tooltip } from '@mui/material';
-import { Translate as TranslateIcon, Settings as SettingsIcon, History as HistoryIcon } from '@mui/icons-material';
+import { Settings as SettingsIcon, History as HistoryIcon } from '@mui/icons-material';
 import { useSettingsStore } from '../../stores/settingsStore';
 
 interface TranslateHeaderProps {
@@ -28,19 +28,16 @@ export default function TranslateHeader({ onHistoryClick }: TranslateHeaderProps
     >
       {/* 앱 로고 + 타이틀 */}
       <Box
+        component='img'
+        src='/favicon-32x32.png'
+        alt='Language Forest Logo'
         sx={{
           width: 32,
           height: 32,
           borderRadius: '8px',
-          background: 'linear-gradient(135deg, rgba(59,130,246,0.9), rgba(124,58,237,0.9))',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           flexShrink: 0,
         }}
-      >
-        <TranslateIcon sx={{ fontSize: 18, color: 'white' }} />
-      </Box>
+      />
       <Typography
         variant='subtitle1'
         sx={{
