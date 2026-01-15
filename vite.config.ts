@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import yaml from '@rollup/plugin-yaml';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 // pnpm(.pnpm) 구조까지 고려해 node_modules 경로에서 실제 패키지 이름을 추출
@@ -24,6 +25,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
+      yaml(),
       visualizer({
         filename: 'dist/stats.html',
         open: false,

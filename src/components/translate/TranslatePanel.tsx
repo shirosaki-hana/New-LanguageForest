@@ -19,7 +19,7 @@ import {
 import { Translate as TranslateIcon, ContentCopy as CopyIcon, Clear as ClearIcon, Stop as StopIcon } from '@mui/icons-material';
 import { useTranslateStore } from '../../stores/translateStore';
 import { snackbar } from '../../stores/snackbarStore';
-import { LANGUAGE_PAIRS } from '../../config/languagePairs';
+import { getLanguagePairs } from '../../utils/promptBuilder';
 
 export default function TranslatePanel() {
   const { t } = useTranslation();
@@ -192,7 +192,7 @@ export default function TranslatePanel() {
                 },
               }}
             >
-              {LANGUAGE_PAIRS.map(pair => (
+              {getLanguagePairs().map(pair => (
                 <MenuItem key={pair.id} value={pair.id}>
                   {pair.label}
                 </MenuItem>

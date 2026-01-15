@@ -6,10 +6,9 @@ import { create } from 'zustand';
 import i18n from '../i18n';
 import type { OllamaModel } from '../types/ollama';
 import { fetchModels, streamChat, generate } from '../api/ollamaApi';
-import { buildTranslationMessages } from '../utils/promptBuilder';
+import { buildTranslationMessages, DEFAULT_PAIR_ID } from '../utils/promptBuilder';
 import { snackbar } from './snackbarStore';
 import { useHistoryStore } from './historyStore';
-import { DEFAULT_PAIR_ID } from '../config/languagePairs';
 
 /**
  * 번역 내용 기반 제목 생성 (백그라운드)
